@@ -72,5 +72,19 @@ describe("TranscriptStore", () => {
     assert.deepEqual(store.getStudentIDs("GRACE LEE"), [graceID]);
     assert.equal(store.getTranscript(graceID).student.studentName, "Grace Lee");
     assert.deepEqual(store.getStudentIDs(), [graceID, alanID]);
+});
+
+  test("rejects a duplicate grade for the same course (BUG-102)", () => {
+    const studentID = store.addStudent("Edsger");
+    store.addGrade(studentID, "cs360", 85);
+
+    assert.throws(
+      () => store.addGrade(studentID, " CS360 ", 40),
+      /Grade already exists for course CS360/,
+    );
+    assert.equal(store.getGrade(studentID, "CS360"), 85);
+
+    store.changeGrade(studentID, "CS360", 90);
+    assert.equal(store.getGrade(studentID, "CS360"), 90);
   });
 });
