@@ -46,14 +46,8 @@ export class TranscriptStore {
 
   addGrade(studentID, course, grade) {
     const parsedID = this.#requireStudent(studentID).studentID;
-    const normalizedCourse = String(course ?? "").trim().toUpperCase();
-    if (!normalizedCourse) {
-      throw new Error("Course name is required");
-    }
-    const numericGrade = Number(grade);
-    if (!Number.isInteger(numericGrade) || numericGrade < 0 || numericGrade > 100) {
-      throw new Error("Grade must be an integer from 0 to 100");
-    }
+    const normalizedCourse = this.#requireCourse(course);
+    const numericGrade = this.#requireGrade(grade);
 
     const studentGrades = this.#grades.get(parsedID) ?? new Map();
     if (studentGrades.has(normalizedCourse)) {
@@ -66,14 +60,8 @@ export class TranscriptStore {
 
   changeGrade(studentID, course, grade) {
     const parsedID = this.#requireStudent(studentID).studentID;
-    const normalizedCourse = String(course ?? "").trim().toUpperCase();
-    if (!normalizedCourse) {
-      throw new Error("Course name is required");
-    }
-    const numericGrade = Number(grade);
-    if (!Number.isInteger(numericGrade) || numericGrade < 0 || numericGrade > 100) {
-      throw new Error("Grade must be an integer from 0 to 100");
-    }
+    const normalizedCourse = this.#requireCourse(course);
+    const numericGrade = this.#requireGrade(grade);
 
     const studentGrades = this.#grades.get(parsedID);
     if (!studentGrades?.has(normalizedCourse)) {
@@ -85,7 +73,7 @@ export class TranscriptStore {
 
   getGrade(studentID, course) {
     const parsedID = this.#requireStudent(studentID).studentID;
-    const normalizedCourse = String(course ?? "").trim().toUpperCase();
+    const normalizedCourse = this.#normalizeCourse(course);
     return this.#grades.get(parsedID)?.get(normalizedCourse);
   }
 
@@ -111,5 +99,25 @@ export class TranscriptStore {
       throw new Error(`Student not found: ${parsedID}`);
     }
     return student;
+  }
+
+  #normalizeCourse(course) {
+    return String(course ?? "").trim().toUpperCase();
+  }
+
+  #requireCourse(course) {
+    const normalizedCourse = this.#normalizeCourse(course);
+    if (!normalizedCourse) {
+      throw new Error("Course name is required");
+    }
+    return normalizedCourse;
+  }
+
+  #requireGrade(grade) {
+    const numericGrade = Number(grade);
+    if (!Number.isInteger(numericGrade) || numericGrade < 0 || numericGrade > 100) {
+      throw new Error("Grade must be an integer from 0 to 100");
+    }
+    return numericGrade;
   }
 }
