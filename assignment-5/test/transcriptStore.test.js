@@ -64,6 +64,16 @@ describe("TranscriptStore", () => {
     assert.throws(() => store.getGrade(studentID, "CS360"), /Student not found/);
   });
 
+  test("name search ignores case and surrounding whitespace (BUG-103)", () => {
+    const graceID = store.addStudent("Grace Lee");
+    const alanID = store.addStudent("Alan Turing");
+
+    assert.deepEqual(store.getStudentIDs("  grace LEE  "), [graceID]);
+    assert.deepEqual(store.getStudentIDs("GRACE LEE"), [graceID]);
+    assert.equal(store.getTranscript(graceID).student.studentName, "Grace Lee");
+    assert.deepEqual(store.getStudentIDs(), [graceID, alanID]);
+});
+
   test("rejects a duplicate grade for the same course (BUG-102)", () => {
     const studentID = store.addStudent("Edsger");
     store.addGrade(studentID, "cs360", 85);
